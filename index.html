@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Arbetslogg — Mobil Bilvård Åland</title>
+
+  <!-- PWA: iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Arbetslogg">
+
+  <!-- PWA: Android -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0c0c0e">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-primary: #0c0c0e;
+      --bg-secondary: #111113;
+      --bg-card: #1c1c1e;
+      --bg-card-hover: #2c2c2e;
+      --bg-glass: rgba(12,12,14,0.85);
+      --text-primary: #f2f2f7;
+      --text-secondary: #8e8e93;
+      --text-muted: #636366;
+      --accent: #C8A96E;
+      --accent-hover: #b8965a;
+      --border: rgba(255,255,255,0.07);
+      --border-accent: rgba(200,169,110,0.3);
+      --font-heading: 'Space Grotesk', -apple-system, sans-serif;
+      --font-body: 'DM Sans', -apple-system, sans-serif;
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --transition: 0.25s ease;
+      --tab-bar-height: 64px;
+      --top-bar-height: 56px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Toppbar */
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--top-bar-height);
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 1.25rem;
+      z-index: 100;
+    }
+    .top-bar__title {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    /* Flikinnehåll */
+    .tab-content {
+      flex: 1;
+      margin-top: var(--top-bar-height);
+      margin-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom));
+      overflow-y: auto;
+    }
+
+    .tab-panel {
+      display: none;
+      padding: 1.25rem;
+      min-height: 100%;
+    }
+    .tab-panel.active { display: block; }
+
+    /* Nedre navigeringsfält */
+    .tab-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--tab-bar-height);
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 0;
+      transition: color var(--transition);
+      color: var(--text-muted);
+    }
+    .tab-btn.active { color: var(--accent); }
+    .tab-btn__icon { font-size: 20px; line-height: 1; }
+    .tab-btn__label { font-size: 11px; font-weight: 500; font-family: var(--font-body); }
+
+    /* Sektionsrubrik */
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+    .section-title--sub {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Statistikkort */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 0.75rem;
+      text-align: center;
+    }
+    .stat-card__label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .stat-card__value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      letter-spacing: -0.02em;
+    }
+
+    /* Paketstatistik */
+    .pkg-stats { margin-bottom: 1.5rem; }
+    .pkg-stat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .pkg-stat-row__name {
+      font-size: 13px;
+      color: var(--text-secondary);
+      width: 110px;
+      flex-shrink: 0;
+    }
+    .pkg-stat-row__bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-card);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .pkg-stat-row__bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+    .pkg-stat-row__amount {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      width: 55px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* Senaste jobb */
+    .recent-list { display: flex; flex-direction: column; gap: 8px; }
+    .recent-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .recent-item__left { display: flex; flex-direction: column; gap: 2px; }
+    .recent-item__pkg { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .recent-item__date { font-size: 12px; color: var(--text-muted); }
+    .recent-item__price { font-size: 15px; font-weight: 700; color: var(--accent); font-family: var(--font-body); }
+
+    /* Tom-state */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* Formulär — Logga */
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    /* Paket- och storleksknappar */
+    .choice-grid { display: flex; flex-direction: column; gap: 10px; }
+    .choice-grid--3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+    .choice-btn {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1rem;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color var(--transition), background var(--transition);
+      user-select: none;
+    }
+    .choice-btn:hover { border-color: rgba(255,255,255,0.15); background: var(--bg-card-hover); }
+    .choice-btn.selected {
+      border-color: var(--border-accent);
+      background: rgba(200,169,110,0.06);
+    }
+    .choice-btn__name { font-size: 14px; font-weight: 500; color: var(--text-primary); display: block; }
+    .choice-btn__price { font-size: 12px; color: var(--text-muted); margin-top: 2px; display: block; }
+    .choice-btn__size { font-size: 13px; font-weight: 500; color: var(--text-primary); display: block; }
+    .choice-btn__note { font-size: 11px; color: var(--text-muted); margin-top: 2px; display: block; }
+
+    /* Textinput */
+    .form-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      font-size: 15px;
+      font-family: var(--font-body);
+      color: var(--text-primary);
+      transition: border-color var(--transition);
+      -webkit-appearance: none;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .form-input::placeholder { color: var(--text-muted); }
+
+    /* Spara-knapp */
+    .save-btn {
+      width: 100%;
+      background: var(--accent);
+      color: var(--bg-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: background var(--transition);
+      margin-top: 0.5rem;
+    }
+    .save-btn:hover { background: var(--accent-hover); }
+    .save-btn:disabled { opacity: 0.35; cursor: default; }
+
+    /* Bekräftelsetoast */
+    .toast {
+      position: fixed;
+      bottom: calc(var(--tab-bar-height) + 1rem);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-card);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 1.2rem;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Historia */
+    .history-list { display: flex; flex-direction: column; gap: 10px; }
+    .history-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .history-item__info { flex: 1; }
+    .history-item__pkg { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .history-item__meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    .history-item__note { font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-style: italic; }
+    .history-item__right { text-align: right; flex-shrink: 0; }
+    .history-item__price { font-size: 16px; font-weight: 700; color: var(--accent); font-family: var(--font-body); }
+    .history-item__delete {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 2px 0;
+      margin-top: 4px;
+      display: block;
+      transition: color var(--transition);
+      font-family: var(--font-body);
+    }
+    .history-item__delete:hover { color: #ff453a; }
+
+    /* Focus */
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toppbar -->
+  <header class="top-bar">
+    <span class="top-bar__title">Arbetslogg</span>
+  </header>
+
+  <!-- Flikar -->
+  <main class="tab-content">
+    <div id="tab-hem" class="tab-panel active">
+
+      <h2 class="section-title">Översikt</h2>
+
+      <!-- Snabbsiffror -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card__label">Denna vecka</div>
+          <div class="stat-card__value" id="stat-week">0 €</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Denna månad</div>
+          <div class="stat-card__value" id="stat-month">0 €</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Totalt</div>
+          <div class="stat-card__value" id="stat-total">0 €</div>
+        </div>
+      </div>
+
+      <!-- Paketstatistik -->
+      <h3 class="section-title section-title--sub">Intäkt per paket</h3>
+      <div class="pkg-stats" id="pkg-stats"></div>
+
+      <!-- Senaste jobb -->
+      <h3 class="section-title section-title--sub">Senaste jobb</h3>
+      <div class="recent-list" id="recent-list"></div>
+
+    </div>
+    <div id="tab-logga" class="tab-panel">
+
+      <h2 class="section-title">Logga jobb</h2>
+
+      <!-- Steg 1: Paket -->
+      <div class="form-group">
+        <label class="form-label">Paket</label>
+        <div class="choice-grid" id="pkg-btns"></div>
+      </div>
+
+      <!-- Steg 2: Bilstorlek -->
+      <div class="form-group">
+        <label class="form-label">Bilstorlek</label>
+        <div class="choice-grid--3" id="size-btns"></div>
+      </div>
+
+      <!-- Steg 3: Pris -->
+      <div class="form-group">
+        <label class="form-label" for="input-price">Pris (€)</label>
+        <input type="number" id="input-price" class="form-input" placeholder="Beräknas automatiskt" min="0">
+      </div>
+
+      <!-- Steg 4: Datum -->
+      <div class="form-group">
+        <label class="form-label" for="input-date">Datum</label>
+        <input type="date" id="input-date" class="form-input">
+      </div>
+
+      <!-- Steg 5: Tidsåtgång -->
+      <div class="form-group">
+        <label class="form-label" for="input-duration">Tidsåtgång (minuter, valfritt)</label>
+        <input type="number" id="input-duration" class="form-input" placeholder="t.ex. 90" min="1">
+      </div>
+
+      <!-- Steg 6: Anteckning -->
+      <div class="form-group">
+        <label class="form-label" for="input-note">Anteckning (valfritt)</label>
+        <input type="text" id="input-note" class="form-input" placeholder="t.ex. husdjurshår, extra smutsig">
+      </div>
+
+      <button class="save-btn" id="save-btn" disabled onclick="saveJob()">Spara jobb</button>
+
+    </div>
+    <div id="tab-historia" class="tab-panel">
+      <h2 class="section-title">Historia</h2>
+      <div class="history-list" id="history-list"></div>
+    </div>
+  </main>
+
+  <!-- Nedre navigering -->
+  <nav class="tab-bar" aria-label="Flikar">
+    <button class="tab-btn active" data-tab="hem" onclick="showTab('hem')">
+      <span class="tab-btn__icon">📊</span>
+      <span class="tab-btn__label">Hem</span>
+    </button>
+    <button class="tab-btn" data-tab="logga" onclick="showTab('logga')">
+      <span class="tab-btn__icon">➕</span>
+      <span class="tab-btn__label">Logga</span>
+    </button>
+    <button class="tab-btn" data-tab="historia" onclick="showTab('historia')">
+      <span class="tab-btn__icon">📋</span>
+      <span class="tab-btn__label">Historia</span>
+    </button>
+  </nav>
+
+  <script>
+    function showTab(name) {
+      const panel = document.getElementById('tab-' + name);
+      const btn   = document.querySelector('[data-tab="' + name + '"]');
+      if (!panel || !btn) return;
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      panel.classList.add('active');
+      btn.classList.add('active');
+      if (name === 'hem')      renderHem();
+      if (name === 'historia') renderHistoria();
+    }
+
+    // ── Konstanter ────────────────────────────────────────────
+    const STORAGE_KEY = 'mba_jobs';
+
+    const PACKAGES = [
+      { id: 'yttre',    label: 'Yttre fräschning', base: 45  },
+      { id: 'komplett', label: 'Komplett rekond',   base: 110 },
+      { id: 'plus',     label: 'Rekond Plus',       base: 160 }
+    ];
+
+    const SIZES = [
+      { id: 'liten',      label: 'Liten',      note: 'Sedan, Kombi', mult: 1.0  },
+      { id: 'mellanstor', label: 'Mellanstor', note: 'SUV, MPV',      mult: 1.2  },
+      { id: 'stor',       label: 'Stor',       note: 'Van, Skåpbil',  mult: 1.45 }
+    ];
+
+    // ── Datalager ─────────────────────────────────────────────
+    function loadJobs() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function saveJobs(jobs) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
+    }
+
+    function addJob(job) {
+      const jobs = loadJobs();
+      job.id = String(Date.now());
+      jobs.unshift(job);
+      saveJobs(jobs);
+      return job;
+    }
+
+    function deleteJob(id) {
+      const jobs = loadJobs().filter(j => j.id !== id);
+      saveJobs(jobs);
+    }
+
+    // ── Formulärtillstånd ─────────────────────────────────────
+    const formState = { pkg: null, size: null };
+
+    function initForm() {
+      const pkgContainer = document.getElementById('pkg-btns');
+      PACKAGES.forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.dataset.id = p.id;
+        btn.innerHTML =
+          '<span class="choice-btn__name">' + p.label + '</span>' +
+          '<span class="choice-btn__price">från ' + p.base + ' €</span>';
+        btn.onclick = () => selectPkg(p.id);
+        pkgContainer.appendChild(btn);
+      });
+
+      const sizeContainer = document.getElementById('size-btns');
+      SIZES.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.dataset.id = s.id;
+        btn.innerHTML =
+          '<span class="choice-btn__size">' + s.label + '</span>' +
+          '<span class="choice-btn__note">' + s.note + '</span>';
+        btn.onclick = () => selectSize(s.id);
+        sizeContainer.appendChild(btn);
+      });
+
+      document.getElementById('input-date').value = todayISO();
+    }
+
+    function selectPkg(id) {
+      formState.pkg = id;
+      document.querySelectorAll('#pkg-btns .choice-btn').forEach(b => {
+        b.classList.toggle('selected', b.dataset.id === id);
+      });
+      updateAutoPrice();
+      updateSaveBtn();
+    }
+
+    function selectSize(id) {
+      formState.size = id;
+      document.querySelectorAll('#size-btns .choice-btn').forEach(b => {
+        b.classList.toggle('selected', b.dataset.id === id);
+      });
+      updateAutoPrice();
+      updateSaveBtn();
+    }
+
+    function updateAutoPrice() {
+      if (!formState.pkg || !formState.size) return;
+      const pkg  = PACKAGES.find(p => p.id === formState.pkg);
+      const size = SIZES.find(s => s.id === formState.size);
+      document.getElementById('input-price').value = Math.round(pkg.base * size.mult);
+    }
+
+    function updateSaveBtn() {
+      const price = document.getElementById('input-price').value;
+      const date  = document.getElementById('input-date').value;
+      const ok = formState.pkg && formState.size && price && date;
+      document.getElementById('save-btn').disabled = !ok;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initForm();
+      renderHem();
+      document.getElementById('input-price').addEventListener('input', updateSaveBtn);
+      document.getElementById('input-date').addEventListener('input', updateSaveBtn);
+    });
+
+    function saveJob() {
+      const pkg  = PACKAGES.find(p => p.id === formState.pkg);
+      const size = SIZES.find(s => s.id === formState.size);
+      const job = {
+        date:         document.getElementById('input-date').value,
+        package:      pkg.id,
+        packageLabel: pkg.label,
+        size:         size.label,
+        sizeMult:     size.mult,
+        price:        parseFloat(document.getElementById('input-price').value),
+        duration:     parseInt(document.getElementById('input-duration').value) || null,
+        note:         document.getElementById('input-note').value.trim()
+      };
+      addJob(job);
+      resetForm();
+      showToast('Jobb sparat ✓');
+      showTab('hem');
+    }
+
+    function resetForm() {
+      formState.pkg = null;
+      formState.size = null;
+      document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+      document.getElementById('input-price').value = '';
+      document.getElementById('input-date').value = todayISO();
+      document.getElementById('input-duration').value = '';
+      document.getElementById('input-note').value = '';
+      document.getElementById('save-btn').disabled = true;
+    }
+
+    // ── Hjälpfunktioner ───────────────────────────────────────
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function todayISO() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return y + '-' + m + '-' + day;
+    }
+
+    function formatDate(iso) {
+      const [y, m, d] = iso.split('-');
+      return d + '.' + m + '.' + y;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    // ── Hem-dashboard ─────────────────────────────────────────
+    function renderHem() {
+      const jobs = loadJobs();
+
+      const now    = new Date();
+      const wkStart = mondayOfWeek(now);
+      const moStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      let sumWeek = 0, sumMonth = 0, sumTotal = 0;
+      jobs.forEach(j => {
+        const [jy, jm, jd] = j.date.split('-').map(Number);
+        const d = new Date(jy, jm - 1, jd);
+        sumTotal += j.price;
+        if (d >= moStart) sumMonth += j.price;
+        if (d >= wkStart) sumWeek  += j.price;
+      });
+
+      document.getElementById('stat-week').textContent  = sumWeek  + ' €';
+      document.getElementById('stat-month').textContent = sumMonth + ' €';
+      document.getElementById('stat-total').textContent = sumTotal + ' €';
+
+      const pkgTotals = {};
+      PACKAGES.forEach(p => { pkgTotals[p.id] = 0; });
+      jobs.forEach(j => { pkgTotals[j.package] = (pkgTotals[j.package] || 0) + j.price; });
+      const maxPkg = Math.max(...Object.values(pkgTotals), 1);
+
+      const pkgContainer = document.getElementById('pkg-stats');
+      let pkgHtml = '';
+      PACKAGES.forEach(p => {
+        const amt = pkgTotals[p.id] || 0;
+        const pct = Math.round((amt / maxPkg) * 100);
+        pkgHtml +=
+          '<div class="pkg-stat-row">' +
+            '<span class="pkg-stat-row__name">' + p.label + '</span>' +
+            '<div class="pkg-stat-row__bar-wrap">' +
+              '<div class="pkg-stat-row__bar" style="width:' + pct + '%"></div>' +
+            '</div>' +
+            '<span class="pkg-stat-row__amount">' + amt + ' €</span>' +
+          '</div>';
+      });
+      pkgContainer.innerHTML = pkgHtml;
+
+      const recentContainer = document.getElementById('recent-list');
+      const recent = jobs.slice(0, 3);
+      if (recent.length === 0) {
+        recentContainer.innerHTML = '<div class="empty-state">Inga jobb loggade ännu.<br>Tryck på Logga för att börja.</div>';
+        return;
+      }
+      let recentHtml = '';
+      recent.forEach(j => {
+        recentHtml +=
+          '<div class="recent-item">' +
+            '<div class="recent-item__left">' +
+              '<span class="recent-item__pkg">' + escapeHtml(j.packageLabel) + ' · ' + escapeHtml(j.size) + '</span>' +
+              '<span class="recent-item__date">' + formatDate(j.date) + '</span>' +
+            '</div>' +
+            '<span class="recent-item__price">' + j.price + ' €</span>' +
+          '</div>';
+      });
+      recentContainer.innerHTML = recentHtml;
+    }
+
+    function mondayOfWeek(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      d.setDate(d.getDate() + diff);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    // ── Historia ──────────────────────────────────────────────
+    function renderHistoria() {
+      const jobs = loadJobs();
+      const container = document.getElementById('history-list');
+      if (jobs.length === 0) {
+        container.innerHTML = '<div class="empty-state">Inga jobb loggade ännu.</div>';
+        return;
+      }
+      let html = '';
+      jobs.forEach(j => {
+        const meta = [escapeHtml(j.size), j.duration ? j.duration + ' min' : null]
+          .filter(Boolean).join(' · ');
+        html +=
+          '<div class="history-item">' +
+            '<div class="history-item__info">' +
+              '<div class="history-item__pkg">' + escapeHtml(j.packageLabel) + '</div>' +
+              '<div class="history-item__meta">' + formatDate(j.date) + (meta ? ' · ' + meta : '') + '</div>' +
+              (j.note ? '<div class="history-item__note">' + escapeHtml(j.note) + '</div>' : '') +
+            '</div>' +
+            '<div class="history-item__right">' +
+              '<div class="history-item__price">' + j.price + ' €</div>' +
+              '<button class="history-item__delete" onclick="confirmDelete(\'' + j.id + \'\')" >Radera</button>' +
+            '</div>' +
+          '</div>';
+      });
+      container.innerHTML = html;
+    }
+
+    function confirmDelete(id) {
+      if (confirm('Radera detta jobb? Det påverkar statistiken.')) {
+        deleteJob(id);
+        renderHistoria();
+        renderHem();
+      }
+    }
+  </script>
+
+  <div class="toast" id="toast"></div>
+
+</body>
+</html>
