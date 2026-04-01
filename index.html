@@ -4,16 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Arbetslogg — Mobil Bilvård Åland</title>
+
+  <!-- PWA: iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Arbetslogg">
+
+  <!-- PWA: Android -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0c0c0e">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
       --bg-primary:    #0c0c0e;
       --bg-secondary:  #111113;
@@ -37,7 +44,9 @@
       --tab-bar-height: 90px;
       --top-bar-height: 60px;
     }
+
     html, body { height: 100%; }
+
     body {
       font-family: var(--font-body);
       background: var(--bg-primary);
@@ -46,6 +55,8 @@
       display: flex;
       flex-direction: column;
     }
+
+    /* ── Toppbar ── */
     .top-bar {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -79,6 +90,8 @@
       margin-left: auto;
       letter-spacing: 0.04em;
     }
+
+    /* ── Flikinnehåll ── */
     .tab-content {
       flex: 1;
       margin-top: var(--top-bar-height);
@@ -86,21 +99,32 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
-    .tab-panel { display: none; padding: 1.5rem 1.25rem; min-height: 100%; }
+
+    .tab-panel {
+      display: none;
+      padding: 1.5rem 1.25rem;
+      min-height: 100%;
+    }
     .tab-panel.active { display: block; }
+
+    /* ── Nedre tabbfält ── */
     .tab-bar {
       position: fixed;
       bottom: 0; left: 0; right: 0;
       background: var(--bg-glass);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
+      /* Guldbård överst — tabbar ligger tydligt UNDER den */
       border-top: 1.5px solid var(--accent-border);
       display: flex;
       align-items: center;
       gap: 10px;
+      /* padding-top skapar luft mellan linjen och knapparna */
       padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
       z-index: 100;
     }
+
+    /* Varje tabb är en synlig kortknapp */
     .tab-btn {
       flex: 1;
       background: var(--bg-card);
@@ -118,14 +142,27 @@
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
-    .tab-btn:active { transform: scale(0.96); }
+    .tab-btn:active {
+      transform: scale(0.96);
+    }
+    /* Aktiv tabb: guldton och guldram */
     .tab-btn.active {
       background: var(--accent-dim);
       border-color: var(--accent-border);
       color: var(--accent);
     }
-    .tab-btn__icon { font-size: 22px; line-height: 1; }
-    .tab-btn__label { font-size: 11px; font-weight: 600; font-family: var(--font-body); letter-spacing: 0.02em; }
+    .tab-btn__icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+    .tab-btn__label {
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Sektionsrubrik ── */
     .section-title {
       font-family: var(--font-heading);
       font-size: 1.4rem;
@@ -140,7 +177,13 @@
       border-radius: 2px;
       margin-bottom: 1.25rem;
     }
-    .section-title--sub { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .section-title--sub {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    /* ── Statistikkort ── */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -150,19 +193,64 @@
     .stat-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
+      /* Guldlinje i toppen av varje kort */
       border-top: 2px solid var(--accent);
       border-radius: var(--radius-md);
       padding: 1rem 0.75rem 0.9rem;
       text-align: center;
     }
-    .stat-card__label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-    .stat-card__value { font-size: 1.25rem; font-weight: 700; color: var(--accent); font-family: var(--font-heading); letter-spacing: -0.02em; }
+    .stat-card__label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .stat-card__value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: var(--font-heading);
+      letter-spacing: -0.02em;
+    }
+
+    /* ── Paketstatistik ── */
     .pkg-stats { margin-bottom: 1.75rem; }
-    .pkg-stat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .pkg-stat-row__name { font-size: 13px; color: var(--text-secondary); width: 115px; flex-shrink: 0; }
-    .pkg-stat-row__bar-wrap { flex: 1; height: 7px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
-    .pkg-stat-row__bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-hover)); border-radius: 4px; transition: width 0.5s ease; }
-    .pkg-stat-row__amount { font-size: 13px; font-weight: 600; color: var(--accent); width: 55px; text-align: right; flex-shrink: 0; }
+    .pkg-stat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .pkg-stat-row__name {
+      font-size: 13px;
+      color: var(--text-secondary);
+      width: 115px;
+      flex-shrink: 0;
+    }
+    .pkg-stat-row__bar-wrap {
+      flex: 1;
+      height: 7px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .pkg-stat-row__bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .pkg-stat-row__amount {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      width: 55px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── Senaste jobb ── */
     .recent-list { display: flex; flex-direction: column; gap: 10px; }
     .recent-item {
       background: var(--bg-card);
@@ -178,12 +266,33 @@
     .recent-item__pkg  { font-size: 14px; font-weight: 500; color: var(--text-primary); }
     .recent-item__date { font-size: 12px; color: var(--text-muted); }
     .recent-item__price { font-size: 16px; font-weight: 700; color: var(--accent); font-family: var(--font-heading); }
-    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 14px; line-height: 1.8; }
+
+    /* ── Tom-state ── */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.8;
+    }
     .empty-state__icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+
+    /* ── Formulär ── */
     .form-group { margin-bottom: 1.5rem; }
-    .form-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); display: block; margin-bottom: 10px; }
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    /* ── Val-knappar (paket & storlek) ── */
     .choice-grid   { display: flex; flex-direction: column; gap: 10px; }
     .choice-grid--3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
     .choice-btn {
       background: var(--bg-card);
       border: 1.5px solid var(--border);
@@ -197,11 +306,17 @@
     }
     .choice-btn:active { transform: scale(0.98); }
     .choice-btn:hover  { border-color: rgba(255,255,255,0.15); background: var(--bg-card-hover); }
-    .choice-btn.selected { border-color: var(--accent); background: var(--accent-dim); box-shadow: 0 0 0 1px var(--accent-border) inset; }
+    .choice-btn.selected {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      box-shadow: 0 0 0 1px var(--accent-border) inset;
+    }
     .choice-btn__name  { font-size: 14px; font-weight: 600; color: var(--text-primary); display: block; }
     .choice-btn__price { font-size: 12px; color: var(--text-muted); margin-top: 3px; display: block; }
     .choice-btn__size  { font-size: 13px; font-weight: 600; color: var(--text-primary); display: block; }
     .choice-btn__note  { font-size: 11px; color: var(--text-muted); margin-top: 3px; display: block; }
+
+    /* ── Textinput ── */
     .form-input {
       width: 100%;
       background: var(--bg-card);
@@ -214,8 +329,14 @@
       transition: border-color var(--transition);
       -webkit-appearance: none;
     }
-    .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,169,110,0.1); }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(200,169,110,0.1);
+    }
     .form-input::placeholder { color: var(--text-muted); }
+
+    /* ── Spara-knapp ── */
     .save-btn {
       width: 100%;
       background: linear-gradient(135deg, var(--accent), var(--accent-hover));
@@ -235,6 +356,8 @@
     .save-btn:hover  { opacity: 0.9; }
     .save-btn:active { transform: scale(0.98); }
     .save-btn:disabled { opacity: 0.3; cursor: default; }
+
+    /* ── Toast ── */
     .toast {
       position: fixed;
       bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom) + 0.75rem);
@@ -253,7 +376,12 @@
       z-index: 200;
       white-space: nowrap;
     }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Historia ── */
     .history-list { display: flex; flex-direction: column; gap: 12px; }
     .history-item {
       background: var(--bg-card);
@@ -273,71 +401,206 @@
     .history-item__meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
     .history-item__note { font-size: 12px; color: var(--text-secondary); margin-top: 5px; font-style: italic; }
     .history-item__right { text-align: right; flex-shrink: 0; }
-    .history-item__price { font-size: 18px; font-weight: 700; color: var(--accent); font-family: var(--font-heading); }
+    .history-item__price {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: var(--font-heading);
+    }
     .history-item__delete {
-      background: none; border: none; color: var(--text-muted);
-      font-size: 12px; cursor: pointer; padding: 4px 0; margin-top: 6px;
-      display: block; transition: color var(--transition); font-family: var(--font-body);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px 0;
+      margin-top: 6px;
+      display: block;
+      transition: color var(--transition);
+      font-family: var(--font-body);
     }
     .history-item__delete:hover { color: #ff453a; }
+
+    /* ── Upsell-knappar (flerval) ── */
+    .upsell-grid { display: flex; flex-direction: column; gap: 10px; }
+    .upsell-btn {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1.1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color var(--transition), background var(--transition);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .upsell-btn:active { transform: scale(0.98); }
+    .upsell-btn.selected {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .upsell-btn__left { display: flex; flex-direction: column; gap: 2px; }
+    .upsell-btn__name  { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .upsell-btn__desc  { font-size: 11px; color: var(--text-muted); }
+    .upsell-btn__price { font-size: 14px; font-weight: 700; color: var(--accent); }
+    .upsell-btn__check {
+      width: 22px; height: 22px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      transition: background var(--transition), border-color var(--transition);
+      flex-shrink: 0;
+    }
+    .upsell-btn.selected .upsell-btn__check {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0c0c0e;
+    }
+
+    /* ── Upsell-statistik ── */
+    .upsell-summary {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .upsell-summary__label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .upsell-summary__value { font-size: 1.3rem; font-weight: 700; color: var(--accent); font-family: var(--font-heading); }
+    .upsell-stats { margin-bottom: 1.75rem; }
+
+    /* ── Accessibility ── */
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Toppbar med guldaccent -->
   <header class="top-bar">
     <div class="top-bar__logo" aria-hidden="true"></div>
     <span class="top-bar__title">Arbetslogg</span>
     <span class="top-bar__sub">Mobil Bilvård Åland</span>
   </header>
+
+  <!-- Flikpaneler -->
   <main class="tab-content">
+
+    <!-- HEM -->
     <div id="tab-hem" class="tab-panel active">
       <h2 class="section-title">Översikt</h2>
       <div class="section-title__line"></div>
+
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-card__label">Denna vecka</div><div class="stat-card__value" id="stat-week">0 €</div></div>
-        <div class="stat-card"><div class="stat-card__label">Denna månad</div><div class="stat-card__value" id="stat-month">0 €</div></div>
-        <div class="stat-card"><div class="stat-card__label">Totalt</div><div class="stat-card__value" id="stat-total">0 €</div></div>
+        <div class="stat-card">
+          <div class="stat-card__label">Denna vecka</div>
+          <div class="stat-card__value" id="stat-week">0 €</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Denna månad</div>
+          <div class="stat-card__value" id="stat-month">0 €</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Totalt</div>
+          <div class="stat-card__value" id="stat-total">0 €</div>
+        </div>
       </div>
+
       <h3 class="section-title section-title--sub">Intäkt per paket</h3>
       <div class="section-title__line"></div>
       <div class="pkg-stats" id="pkg-stats"></div>
+
+      <h3 class="section-title section-title--sub">Intäkt via upselling</h3>
+      <div class="section-title__line"></div>
+      <div id="upsell-stats"></div>
+
       <h3 class="section-title section-title--sub">Senaste jobb</h3>
       <div class="section-title__line"></div>
       <div class="recent-list" id="recent-list"></div>
     </div>
+
+    <!-- LOGGA -->
     <div id="tab-logga" class="tab-panel">
       <h2 class="section-title">Logga jobb</h2>
       <div class="section-title__line"></div>
-      <div class="form-group"><label class="form-label">Paket</label><div class="choice-grid" id="pkg-btns"></div></div>
-      <div class="form-group"><label class="form-label">Bilstorlek</label><div class="choice-grid--3" id="size-btns"></div></div>
-      <div class="form-group"><label class="form-label" for="input-price">Pris (€)</label><input type="number" id="input-price" class="form-input" placeholder="Beräknas automatiskt" min="0"></div>
-      <div class="form-group"><label class="form-label" for="input-date">Datum</label><input type="date" id="input-date" class="form-input"></div>
-      <div class="form-group"><label class="form-label" for="input-duration">Tidsåtgång — minuter (valfritt)</label><input type="number" id="input-duration" class="form-input" placeholder="t.ex. 90" min="1"></div>
-      <div class="form-group"><label class="form-label" for="input-note">Anteckning (valfritt)</label><input type="text" id="input-note" class="form-input" placeholder="t.ex. husdjurshår, extra smutsig"></div>
+
+      <div class="form-group">
+        <label class="form-label">Paket</label>
+        <div class="choice-grid" id="pkg-btns"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Bilstorlek</label>
+        <div class="choice-grid--3" id="size-btns"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-price">Pris (€)</label>
+        <input type="number" id="input-price" class="form-input" placeholder="Beräknas automatiskt" min="0">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-date">Datum</label>
+        <input type="date" id="input-date" class="form-input">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-duration">Tidsåtgång — minuter (valfritt)</label>
+        <input type="number" id="input-duration" class="form-input" placeholder="t.ex. 90" min="1">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-note">Anteckning (valfritt)</label>
+        <input type="text" id="input-note" class="form-input" placeholder="t.ex. husdjurshår, extra smutsig">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Upsell (valfritt)</label>
+        <div class="upsell-grid" id="upsell-btns"></div>
+      </div>
+
       <button type="button" class="save-btn" id="save-btn" disabled onclick="saveJob()">Spara jobb</button>
     </div>
+
+    <!-- HISTORIA -->
     <div id="tab-historia" class="tab-panel">
       <h2 class="section-title">Historia</h2>
       <div class="section-title__line"></div>
       <div class="history-list" id="history-list"></div>
     </div>
+
   </main>
+
+  <!-- Nedre tabbfält — knappar sitter under guldlinjen -->
   <nav class="tab-bar" aria-label="Flikar">
     <button type="button" class="tab-btn active" data-tab="hem" onclick="showTab('hem')">
-      <span class="tab-btn__icon">📊</span><span class="tab-btn__label">Hem</span>
+      <span class="tab-btn__icon">📊</span>
+      <span class="tab-btn__label">Hem</span>
     </button>
     <button type="button" class="tab-btn" data-tab="logga" onclick="showTab('logga')">
-      <span class="tab-btn__icon">➕</span><span class="tab-btn__label">Logga</span>
+      <span class="tab-btn__icon">➕</span>
+      <span class="tab-btn__label">Logga</span>
     </button>
     <button type="button" class="tab-btn" data-tab="historia" onclick="showTab('historia')">
-      <span class="tab-btn__icon">📋</span><span class="tab-btn__label">Historia</span>
+      <span class="tab-btn__icon">📋</span>
+      <span class="tab-btn__label">Historia</span>
     </button>
   </nav>
+
   <div class="toast" id="toast"></div>
+
   <script>
+    // ── Fliknavigering ────────────────────────────────────────
     function showTab(name) {
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -349,22 +612,36 @@
       if (name === 'hem')      renderHem();
       if (name === 'historia') renderHistoria();
     }
+
+    // ── Konstanter ────────────────────────────────────────────
     const STORAGE_KEY = 'mba_jobs';
+
     const PACKAGES = [
       { id: 'yttre',    label: 'Yttre fräschning', base: 45  },
       { id: 'komplett', label: 'Komplett rekond',   base: 110 },
       { id: 'plus',     label: 'Rekond Plus',       base: 160 }
     ];
+
     const SIZES = [
       { id: 'liten',      label: 'Liten',      note: 'Sedan, Kombi', mult: 1.0  },
       { id: 'mellanstor', label: 'Mellanstor', note: 'SUV, MPV',      mult: 1.2  },
       { id: 'stor',       label: 'Stor',       note: 'Van, Skåpbil',  mult: 1.45 }
     ];
+
+    const UPSELLS = [
+      { id: 'keramiskt_vax',        label: 'Keramiskt vax',        desc: 'Långvarigt keramiskt skyddsskikt', price: 50 },
+      { id: 'tackglans',            label: 'Däckglans',            desc: 'Glansbehandling av däck och gummi', price: 15 },
+      { id: 'stralkastarpolering',  label: 'Strålkastarpolering',  desc: 'Polering av gulnade strålkastare',  price: 45 }
+    ];
+
+    // ── Datalager ─────────────────────────────────────────────
     function loadJobs() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
       catch { return []; }
     }
-    function saveJobs(jobs) { localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs)); }
+    function saveJobs(jobs) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
+    }
     function addJob(job) {
       const jobs = loadJobs();
       job.id = String(Date.now());
@@ -372,149 +649,330 @@
       saveJobs(jobs);
       return job;
     }
-    function deleteJob(id) { saveJobs(loadJobs().filter(j => j.id !== id)); }
-    const formState = { pkg: null, size: null };
+    function deleteJob(id) {
+      saveJobs(loadJobs().filter(j => j.id !== id));
+    }
+
+    // ── Formulär ──────────────────────────────────────────────
+    const formState = { pkg: null, size: null, upsells: new Set() };
+
     function initForm() {
       const pkgContainer = document.getElementById('pkg-btns');
       PACKAGES.forEach(p => {
         const btn = document.createElement('button');
-        btn.type = 'button'; btn.className = 'choice-btn'; btn.dataset.id = p.id;
-        btn.innerHTML = '<span class="choice-btn__name">' + p.label + '</span><span class="choice-btn__price">från ' + p.base + ' €</span>';
+        btn.type = 'button';
+        btn.className = 'choice-btn';
+        btn.dataset.id = p.id;
+        btn.innerHTML =
+          '<span class="choice-btn__name">' + p.label + '</span>' +
+          '<span class="choice-btn__price">från ' + p.base + ' €</span>';
         btn.onclick = () => selectPkg(p.id);
         pkgContainer.appendChild(btn);
       });
+
       const sizeContainer = document.getElementById('size-btns');
       SIZES.forEach(s => {
         const btn = document.createElement('button');
-        btn.type = 'button'; btn.className = 'choice-btn'; btn.dataset.id = s.id;
-        btn.innerHTML = '<span class="choice-btn__size">' + s.label + '</span><span class="choice-btn__note">' + s.note + '</span>';
+        btn.type = 'button';
+        btn.className = 'choice-btn';
+        btn.dataset.id = s.id;
+        btn.innerHTML =
+          '<span class="choice-btn__size">' + s.label + '</span>' +
+          '<span class="choice-btn__note">' + s.note + '</span>';
         btn.onclick = () => selectSize(s.id);
         sizeContainer.appendChild(btn);
       });
+
       document.getElementById('input-date').value = todayISO();
+
+      // Bygg upsell-knappar (flerval)
+      const upsellContainer = document.getElementById('upsell-btns');
+      UPSELLS.forEach(u => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'upsell-btn';
+        btn.dataset.id = u.id;
+        btn.innerHTML =
+          '<div class="upsell-btn__left">' +
+            '<span class="upsell-btn__name">' + u.label + '</span>' +
+            '<span class="upsell-btn__desc">' + u.desc + '</span>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:10px;">' +
+            '<span class="upsell-btn__price">+' + u.price + ' €</span>' +
+            '<div class="upsell-btn__check"></div>' +
+          '</div>';
+        btn.onclick = () => toggleUpsell(u.id);
+        upsellContainer.appendChild(btn);
+      });
     }
+
     function selectPkg(id) {
       formState.pkg = id;
-      document.querySelectorAll('#pkg-btns .choice-btn').forEach(b => b.classList.toggle('selected', b.dataset.id === id));
-      updateAutoPrice(); updateSaveBtn();
+      document.querySelectorAll('#pkg-btns .choice-btn').forEach(b =>
+        b.classList.toggle('selected', b.dataset.id === id));
+      updateAutoPrice();
+      updateSaveBtn();
     }
+
     function selectSize(id) {
       formState.size = id;
-      document.querySelectorAll('#size-btns .choice-btn').forEach(b => b.classList.toggle('selected', b.dataset.id === id));
-      updateAutoPrice(); updateSaveBtn();
+      document.querySelectorAll('#size-btns .choice-btn').forEach(b =>
+        b.classList.toggle('selected', b.dataset.id === id));
+      updateAutoPrice();
+      updateSaveBtn();
     }
+
+    function toggleUpsell(id) {
+      if (formState.upsells.has(id)) {
+        formState.upsells.delete(id);
+      } else {
+        formState.upsells.add(id);
+      }
+      document.querySelectorAll('#upsell-btns .upsell-btn').forEach(b => {
+        const active = formState.upsells.has(b.dataset.id);
+        b.classList.toggle('selected', active);
+        b.querySelector('.upsell-btn__check').textContent = active ? '✓' : '';
+      });
+      updateAutoPrice();
+    }
+
     function updateAutoPrice() {
       if (!formState.pkg || !formState.size) return;
       const pkg  = PACKAGES.find(p => p.id === formState.pkg);
       const size = SIZES.find(s => s.id === formState.size);
-      document.getElementById('input-price').value = Math.round(pkg.base * size.mult);
+      const basePrice = Math.round(pkg.base * size.mult);
+      const upsellTotal = [...formState.upsells]
+        .reduce((sum, id) => sum + (UPSELLS.find(u => u.id === id)?.price || 0), 0);
+      document.getElementById('input-price').value = basePrice + upsellTotal;
     }
+
     function updateSaveBtn() {
       const price = document.getElementById('input-price').value;
       const date  = document.getElementById('input-date').value;
-      document.getElementById('save-btn').disabled = !(formState.pkg && formState.size && price && date);
+      document.getElementById('save-btn').disabled =
+        !(formState.pkg && formState.size && price && date);
     }
+
     document.addEventListener('DOMContentLoaded', () => {
-      initForm(); renderHem();
+      initForm();
+      renderHem();
       document.getElementById('input-price').addEventListener('input', updateSaveBtn);
       document.getElementById('input-date').addEventListener('input', updateSaveBtn);
     });
+
     function saveJob() {
       const pkg  = PACKAGES.find(p => p.id === formState.pkg);
       const size = SIZES.find(s => s.id === formState.size);
-      addJob({
-        date: document.getElementById('input-date').value,
-        package: pkg.id, packageLabel: pkg.label,
-        size: size.label, sizeMult: size.mult,
-        price: parseFloat(document.getElementById('input-price').value),
-        duration: parseInt(document.getElementById('input-duration').value) || null,
-        note: document.getElementById('input-note').value.trim()
+      const selectedUpsells = [...formState.upsells].map(id => {
+        const u = UPSELLS.find(u => u.id === id);
+        return { id: u.id, label: u.label, price: u.price };
       });
-      resetForm(); showToast('Jobb sparat ✓'); showTab('hem');
+      addJob({
+        date:         document.getElementById('input-date').value,
+        package:      pkg.id,
+        packageLabel: pkg.label,
+        size:         size.label,
+        sizeMult:     size.mult,
+        price:        parseFloat(document.getElementById('input-price').value),
+        duration:     parseInt(document.getElementById('input-duration').value) || null,
+        note:         document.getElementById('input-note').value.trim(),
+        upsells:      selectedUpsells
+      });
+      resetForm();
+      showToast('Jobb sparat ✓');
+      showTab('hem');
     }
+
     function resetForm() {
-      formState.pkg = null; formState.size = null;
+      formState.pkg = null;
+      formState.size = null;
+      formState.upsells.clear();
       document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
-      document.getElementById('input-price').value = '';
-      document.getElementById('input-date').value = todayISO();
+      document.querySelectorAll('.upsell-btn').forEach(b => {
+        b.classList.remove('selected');
+        b.querySelector('.upsell-btn__check').textContent = '';
+      });
+      document.getElementById('input-price').value   = '';
+      document.getElementById('input-date').value    = todayISO();
       document.getElementById('input-duration').value = '';
-      document.getElementById('input-note').value = '';
+      document.getElementById('input-note').value    = '';
       document.getElementById('save-btn').disabled = true;
     }
+
+    // ── Hjälpfunktioner ───────────────────────────────────────
     function escapeHtml(str) {
       if (!str) return '';
-      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
     function todayISO() {
       const d = new Date();
-      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      return d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
     }
-    function formatDate(iso) { const [y,m,d] = iso.split('-'); return d+'.'+m+'.'+y; }
+    function formatDate(iso) {
+      const [y, m, d] = iso.split('-');
+      return d + '.' + m + '.' + y;
+    }
     function showToast(msg) {
       const t = document.getElementById('toast');
-      t.textContent = msg; t.classList.add('show');
+      t.textContent = msg;
+      t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 2200);
     }
+
+    // ── Hem-dashboard ─────────────────────────────────────────
     function renderHem() {
       const jobs = loadJobs();
-      const now = new Date();
+      const now  = new Date();
       const wkStart = mondayOfWeek(now);
       const moStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
       let sumWeek = 0, sumMonth = 0, sumTotal = 0;
       jobs.forEach(j => {
-        const [jy,jm,jd] = j.date.split('-').map(Number);
-        const d = new Date(jy, jm-1, jd);
+        const [jy, jm, jd] = j.date.split('-').map(Number);
+        const d = new Date(jy, jm - 1, jd);
         sumTotal += j.price;
         if (d >= moStart) sumMonth += j.price;
         if (d >= wkStart) sumWeek  += j.price;
       });
+
       document.getElementById('stat-week').textContent  = sumWeek  + ' €';
       document.getElementById('stat-month').textContent = sumMonth + ' €';
       document.getElementById('stat-total').textContent = sumTotal + ' €';
+
+      // Paketstatistik
       const pkgTotals = {};
       PACKAGES.forEach(p => { pkgTotals[p.id] = 0; });
-      jobs.forEach(j => { pkgTotals[j.package] = (pkgTotals[j.package]||0) + j.price; });
+      jobs.forEach(j => { pkgTotals[j.package] = (pkgTotals[j.package] || 0) + j.price; });
       const maxPkg = Math.max(...Object.values(pkgTotals), 1);
+
       let pkgHtml = '';
       PACKAGES.forEach(p => {
-        const amt = pkgTotals[p.id]||0;
-        const pct = Math.round((amt/maxPkg)*100);
-        pkgHtml += '<div class="pkg-stat-row"><span class="pkg-stat-row__name">'+p.label+'</span><div class="pkg-stat-row__bar-wrap"><div class="pkg-stat-row__bar" style="width:'+pct+'%"></div></div><span class="pkg-stat-row__amount">'+amt+' €</span></div>';
+        const amt = pkgTotals[p.id] || 0;
+        const pct = Math.round((amt / maxPkg) * 100);
+        pkgHtml +=
+          '<div class="pkg-stat-row">' +
+            '<span class="pkg-stat-row__name">' + p.label + '</span>' +
+            '<div class="pkg-stat-row__bar-wrap">' +
+              '<div class="pkg-stat-row__bar" style="width:' + pct + '%"></div>' +
+            '</div>' +
+            '<span class="pkg-stat-row__amount">' + amt + ' €</span>' +
+          '</div>';
       });
       document.getElementById('pkg-stats').innerHTML = pkgHtml;
-      const recent = jobs.slice(0,3);
+
+      // Upsell-statistik
+      renderUpsellStats(jobs);
+
+      // Senaste 3 jobb
+      const recent = jobs.slice(0, 3);
       if (recent.length === 0) {
-        document.getElementById('recent-list').innerHTML = '<div class="empty-state"><div class="empty-state__icon">🚗</div>Inga jobb loggade ännu.<br>Tryck på <strong>Logga</strong> för att börja.</div>';
+        document.getElementById('recent-list').innerHTML =
+          '<div class="empty-state"><div class="empty-state__icon">🚗</div>' +
+          'Inga jobb loggade ännu.<br>Tryck på <strong>Logga</strong> för att börja.</div>';
         return;
       }
       let recentHtml = '';
       recent.forEach(j => {
-        recentHtml += '<div class="recent-item"><div class="recent-item__left"><span class="recent-item__pkg">'+escapeHtml(j.packageLabel)+' · '+escapeHtml(j.size)+'</span><span class="recent-item__date">'+formatDate(j.date)+'</span></div><span class="recent-item__price">'+j.price+' €</span></div>';
+        recentHtml +=
+          '<div class="recent-item">' +
+            '<div class="recent-item__left">' +
+              '<span class="recent-item__pkg">' + escapeHtml(j.packageLabel) + ' · ' + escapeHtml(j.size) + '</span>' +
+              '<span class="recent-item__date">' + formatDate(j.date) + '</span>' +
+            '</div>' +
+            '<span class="recent-item__price">' + j.price + ' €</span>' +
+          '</div>';
       });
       document.getElementById('recent-list').innerHTML = recentHtml;
     }
+
     function mondayOfWeek(date) {
-      const d = new Date(date); const day = d.getDay();
-      d.setDate(d.getDate() + (day===0 ? -6 : 1-day));
-      d.setHours(0,0,0,0); return d;
+      const d = new Date(date);
+      const day = d.getDay();
+      d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
+      d.setHours(0, 0, 0, 0);
+      return d;
     }
+
+    // ── Upsell-statistik ─────────────────────────────────────
+    function renderUpsellStats(jobs) {
+      const container = document.getElementById('upsell-stats');
+
+      // Summera per upsell-typ
+      const totals = {};
+      UPSELLS.forEach(u => { totals[u.id] = 0; });
+      let grandTotal = 0;
+      jobs.forEach(j => {
+        if (!j.upsells) return;
+        j.upsells.forEach(u => {
+          totals[u.id] = (totals[u.id] || 0) + u.price;
+          grandTotal += u.price;
+        });
+      });
+
+      const maxVal = Math.max(...Object.values(totals), 1);
+
+      let html =
+        '<div class="upsell-summary">' +
+          '<div><div class="upsell-summary__label">Total upselling</div></div>' +
+          '<div class="upsell-summary__value">' + grandTotal + ' €</div>' +
+        '</div>' +
+        '<div class="upsell-stats">';
+
+      UPSELLS.forEach(u => {
+        const amt = totals[u.id] || 0;
+        const pct = Math.round((amt / maxVal) * 100);
+        html +=
+          '<div class="pkg-stat-row">' +
+            '<span class="pkg-stat-row__name">' + u.label + '</span>' +
+            '<div class="pkg-stat-row__bar-wrap">' +
+              '<div class="pkg-stat-row__bar" style="width:' + pct + '%"></div>' +
+            '</div>' +
+            '<span class="pkg-stat-row__amount">' + amt + ' €</span>' +
+          '</div>';
+      });
+
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // ── Historia ──────────────────────────────────────────────
     function renderHistoria() {
       const jobs = loadJobs();
       const container = document.getElementById('history-list');
       if (jobs.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state__icon">📋</div>Inga jobb loggade ännu.</div>';
+        container.innerHTML =
+          '<div class="empty-state"><div class="empty-state__icon">📋</div>Inga jobb loggade ännu.</div>';
         return;
       }
       let html = '';
       jobs.forEach(j => {
-        const meta = [escapeHtml(j.size), j.duration ? j.duration+' min' : null].filter(Boolean).join(' · ');
-        html += '<div class="history-item"><div class="history-item__info"><div class="history-item__pkg">'+escapeHtml(j.packageLabel)+'</div><div class="history-item__meta">'+formatDate(j.date)+(meta?' · '+meta:'')+'</div>'+(j.note?'<div class="history-item__note">'+escapeHtml(j.note)+'</div>':'')+'</div><div class="history-item__right"><div class="history-item__price">'+j.price+' €</div><button type="button" class="history-item__delete" onclick="confirmDelete(\''+j.id+'\')" >Radera</button></div></div>';
+        const meta = [escapeHtml(j.size), j.duration ? j.duration + ' min' : null]
+          .filter(Boolean).join(' · ');
+        html +=
+          '<div class="history-item">' +
+            '<div class="history-item__info">' +
+              '<div class="history-item__pkg">' + escapeHtml(j.packageLabel) + '</div>' +
+              '<div class="history-item__meta">' + formatDate(j.date) + (meta ? ' · ' + meta : '') + '</div>' +
+              (j.note ? '<div class="history-item__note">' + escapeHtml(j.note) + '</div>' : '') +
+            '</div>' +
+            '<div class="history-item__right">' +
+              '<div class="history-item__price">' + j.price + ' €</div>' +
+              '<button type="button" class="history-item__delete" onclick="confirmDelete(\'' + j.id + '\')">Radera</button>' +
+            '</div>' +
+          '</div>';
       });
       container.innerHTML = html;
     }
+
     function confirmDelete(id) {
       if (confirm('Radera detta jobb? Det påverkar statistiken.')) {
-        deleteJob(id); renderHistoria(); renderHem();
+        deleteJob(id);
+        renderHistoria();
+        renderHem();
       }
     }
   </script>
