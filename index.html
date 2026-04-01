@@ -220,7 +220,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
     .pkg-stat-row__name {
       font-size: 13px;
@@ -228,18 +228,35 @@
       width: 115px;
       flex-shrink: 0;
     }
+    /* Game-style hunger bar — tydlig bår med djup och glöd */
     .pkg-stat-row__bar-wrap {
       flex: 1;
-      height: 7px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 4px;
+      height: 20px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
       overflow: hidden;
+      position: relative;
     }
     .pkg-stat-row__bar {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-hover));
-      border-radius: 4px;
-      transition: width 0.5s ease;
+      background: linear-gradient(180deg,
+        rgba(255,255,255,0.18) 0%,
+        var(--accent) 30%,
+        var(--accent-hover) 100%);
+      border-radius: 5px;
+      transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px rgba(200,169,110,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+      position: relative;
+    }
+    /* Lysskant längst upp i baren */
+    .pkg-stat-row__bar::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 3px; right: 3px;
+      height: 4px;
+      background: rgba(255,255,255,0.22);
+      border-radius: 3px;
     }
     .pkg-stat-row__amount {
       font-size: 13px;
@@ -862,10 +879,23 @@
             '<span class="pkg-stat-row__amount">' + amt + ' €</span>' +
           '</div>';
       });
-      document.getElementById('pkg-stats').innerHTML = pkgHtml;
 
-      // Upsell-statistik
-      renderUpsellStats(jobs);
+      // Upselling som en fjärde rad i samma lista
+      const upsellTotal = jobs.reduce((sum, j) => {
+        if (!j.upsells) return sum;
+        return sum + j.upsells.reduce((s, u) => s + u.price, 0);
+      }, 0);
+      const upsellPct = Math.round((upsellTotal / Math.max(...Object.values(pkgTotals), upsellTotal, 1)) * 100);
+      pkgHtml +=
+        '<div class="pkg-stat-row">' +
+          '<span class="pkg-stat-row__name" style="color:var(--accent)">Upselling</span>' +
+          '<div class="pkg-stat-row__bar-wrap">' +
+            '<div class="pkg-stat-row__bar" style="width:' + upsellPct + '%"></div>' +
+          '</div>' +
+          '<span class="pkg-stat-row__amount">' + upsellTotal + ' €</span>' +
+        '</div>';
+
+      document.getElementById('pkg-stats').innerHTML = pkgHtml;
 
       // Senaste 3 jobb
       const recent = jobs.slice(0, 3);
@@ -895,48 +925,6 @@
       d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
       d.setHours(0, 0, 0, 0);
       return d;
-    }
-
-    // ── Upsell-statistik ─────────────────────────────────────
-    function renderUpsellStats(jobs) {
-      const container = document.getElementById('upsell-stats');
-
-      // Summera per upsell-typ
-      const totals = {};
-      UPSELLS.forEach(u => { totals[u.id] = 0; });
-      let grandTotal = 0;
-      jobs.forEach(j => {
-        if (!j.upsells) return;
-        j.upsells.forEach(u => {
-          totals[u.id] = (totals[u.id] || 0) + u.price;
-          grandTotal += u.price;
-        });
-      });
-
-      const maxVal = Math.max(...Object.values(totals), 1);
-
-      let html =
-        '<div class="upsell-summary">' +
-          '<div><div class="upsell-summary__label">Total upselling</div></div>' +
-          '<div class="upsell-summary__value">' + grandTotal + ' €</div>' +
-        '</div>' +
-        '<div class="upsell-stats">';
-
-      UPSELLS.forEach(u => {
-        const amt = totals[u.id] || 0;
-        const pct = Math.round((amt / maxVal) * 100);
-        html +=
-          '<div class="pkg-stat-row">' +
-            '<span class="pkg-stat-row__name">' + u.label + '</span>' +
-            '<div class="pkg-stat-row__bar-wrap">' +
-              '<div class="pkg-stat-row__bar" style="width:' + pct + '%"></div>' +
-            '</div>' +
-            '<span class="pkg-stat-row__amount">' + amt + ' €</span>' +
-          '</div>';
-      });
-
-      html += '</div>';
-      container.innerHTML = html;
     }
 
     // ── Historia ──────────────────────────────────────────────
