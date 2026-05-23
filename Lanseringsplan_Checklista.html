@@ -431,6 +431,142 @@
 
 <div class="main">
 
+  <!-- ─── FAS 0: GRUNDLÄGGNING ────────────────────────────────────────── -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-tag foundation">Fas 0</span>
+      <div>
+        <div class="phase-title">Grundläggning — innan allt annat</div>
+        <div class="phase-subtitle">Vi delar inte upp uppgifter. Allt görs tillsammans.</div>
+      </div>
+      <div class="phase-progress" id="prog-0"></div>
+    </div>
+    <div class="tasks" data-phase="0">
+
+      <div class="task crit" data-id="f1" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Välj bolagsform (öppet bolag eller Ab)</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~1 h diskussion</span>
+          </div>
+          <div class="task-note">Båda måste vara överens. Default-rekommendation: öppet bolag — billigast och enklast. Uppgradera till Ab senare om omsättning eller riskprofil ökar.</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="f2" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Registrera bolaget hos PRH (få FO-nummer)</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~2 h</span>
+            <span class="badge cost">50–380 €</span>
+            <span class="badge tool">prh.fi / ytj.fi</span>
+          </div>
+          <div class="task-note">Kräver bolagsavtal + e-identifiering. Kostnad beror på bolagsform (öppet bolag ~240 €, Ab ~380 €).</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="f3" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Skriv partneravtal Calle/Hugo</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~2 h</span>
+          </div>
+          <div class="task-note">Vinstdelning 50/50, ansvarsområden, vad händer vid utträde, hur löses tvister. Mall finns hos PRH.</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="f4" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Teckna företagsförsäkring (ansvar + egendom)</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~1 h</span>
+            <span class="badge cost">~30–60 €/mån</span>
+          </div>
+          <div class="task-note">Ni jobbar med andras dyra bilar. Utan ansvarsförsäkring kan en skada förstöra er privatekonomi. Be om offert från If, LokalTapiola eller Ålands Ömsesidiga.</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="f5" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Lös vattenhanteringen (bygg uppsamlingsmatta)</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~1 dag bygge</span>
+            <span class="badge cost">under 200 €</span>
+          </div>
+          <div class="task-note">Smutsvatten får inte gå i dagvattenbrunnar. Vi bygger en PVC-matta som samlar upp vattnet. Klicka för byggguide ↓</div>
+
+          <details class="build-guide" onclick="event.stopPropagation()">
+            <summary>Byggguide för vattenmatta</summary>
+            <div class="build-guide__body">
+              <!-- Fylls i Task 3 -->
+            </div>
+          </details>
+
+        </div>
+      </div>
+
+      <div class="task crit" data-id="f6" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Verifiera lagligt hos ÅMHM (Ålands miljö- och hälsoskyddsmyndighet)</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~1 vecka väntetid</span>
+            <span class="badge tool">amhm.ax</span>
+          </div>
+          <div class="task-note">Maila ÅMHM, beskriv vår vattenlösning (mattan + dunk-uppsamling) och fråga var vi får tömma vattnet. Få skriftligt OK INNAN första kunden. Spara mailet.</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="f7" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Anmäl till skatteförvaltningen (moms + förskottsuppbörd)</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~30 min</span>
+            <span class="badge tool">vero.fi</span>
+          </div>
+          <div class="task-note">Görs direkt efter FO-nummer. Anmäl oss till momsregistret och förskottsuppbördsregistret.</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="f8" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Öppna gemensamt företagskonto</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~1 h</span>
+          </div>
+          <div class="task-note">Kräver FO-nummer + bolagsavtal. Båda ägare på kontot. Inga blandade privata och företagspengar.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="f9" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Bestäm intern arbetsrytm</div>
+          <div class="task-meta">
+            <span class="badge time">~30 min</span>
+          </div>
+          <div class="task-note">Hur planerar vi veckan? Vem tar bokningssamtalet om båda är upptagna? Hur synkar vi schema (delad Google Calendar?)? Vi delar inte upp roller — vi delar arbetssättet.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ─── FAS 1: DENNA VECKA (KRITISK) ─────────────────────────────────── -->
   <div class="phase">
     <div class="phase-header">
