@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lanseringsplan — Mobil Bilvård Åland</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0c0c0e;
+    --bg2:       #111113;
+    --card:      #1c1c1e;
+    --card2:     #242426;
+    --gold:      #C8A96E;
+    --gold-dim:  rgba(200,169,110,0.18);
+    --gold-line: rgba(200,169,110,0.35);
+    --text:      #f2f2f7;
+    --muted:     #8e8e93;
+    --dim:       #48484a;
+    --green:     #30d158;
+    --green-dim: rgba(48,209,88,0.12);
+    --red:       #ff453a;
+    --border:    rgba(255,255,255,0.07);
+    --radius:    14px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(12,12,14,0.9);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+
+  .header-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 18px 0 14px;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 12px;
+  }
+
+  .brand { font-size: 11px; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+  .header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; margin-top: 2px; }
+  .progress-label { font-size: 13px; color: var(--muted); }
+  .progress-label span { color: var(--gold); font-weight: 600; }
+
+  .progress-bar-track {
+    height: 5px;
+    background: var(--card);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), #e8c98e);
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px 0;
+  }
+
+  /* ── PHASE ── */
+  .phase {
+    margin-bottom: 36px;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .phase-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 99px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+
+  .phase-tag.urgent  { color: var(--red);   border-color: rgba(255,69,58,0.4);   background: rgba(255,69,58,0.08); }
+  .phase-tag.foundation { color: #ff9f0a; border-color: rgba(255,159,10,0.4); background: rgba(255,159,10,0.08); }
+  .phase-tag.launch  { color: var(--gold);  border-color: var(--gold-line);       background: var(--gold-dim); }
+  .phase-tag.week1   { color: #64d2ff;      border-color: rgba(100,210,255,0.4);  background: rgba(100,210,255,0.08); }
+  .phase-tag.month1  { color: var(--green); border-color: rgba(48,209,88,0.4);    background: var(--green-dim); }
+  .phase-tag.scale   { color: #bf5af2;      border-color: rgba(191,90,242,0.4);   background: rgba(191,90,242,0.08); }
+
+  .phase-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .phase-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .phase-progress {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ── TASKS ── */
+  .tasks { display: flex; flex-direction: column; gap: 8px; }
+
+  .task {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .task:hover { background: var(--card2); border-color: rgba(255,255,255,0.12); }
+  .task:active { transform: scale(0.995); }
+
+  .task.done {
+    background: var(--green-dim);
+    border-color: rgba(48,209,88,0.2);
+  }
+
+  .task.done .task-title { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--dim); }
+  .task.done .task-meta  { opacity: 0.5; }
+
+  /* Priority dot */
+  .task.crit::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--red);
+    border-radius: var(--radius) 0 0 var(--radius);
+  }
+
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--dim);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, background 0.2s;
+    font-size: 13px;
+  }
+
+  .task.done .checkbox {
+    border-color: var(--green);
+    background: var(--green);
+    color: #fff;
+  }
+
+  .task-body { flex: 1; min-width: 0; }
+
+  .task-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    transition: color 0.2s;
+  }
+
+  .task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+    align-items: center;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 500;
+  }
+
+  .badge.time   { background: rgba(255,255,255,0.06); color: var(--muted); }
+  .badge.cost   { background: rgba(200,169,110,0.1);  color: var(--gold); }
+  .badge.crit   { background: rgba(255,69,58,0.1);    color: var(--red); }
+  .badge.tool   { background: rgba(100,210,255,0.08); color: #64d2ff; }
+
+  .task-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 5px;
+    line-height: 1.5;
+  }
+
+  /* ── BYGGGUIDE (accordeon) ── */
+  .build-guide {
+    margin-top: 12px;
+    background: var(--card2);
+    border: 1px solid var(--gold-line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .build-guide summary {
+    cursor: pointer;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+  }
+
+  .build-guide summary::-webkit-details-marker { display: none; }
+
+  .build-guide summary::after {
+    content: '+';
+    font-size: 20px;
+    line-height: 1;
+    transition: transform 0.2s;
+  }
+
+  .build-guide[open] summary::after { content: '−'; }
+
+  .build-guide__body {
+    padding: 4px 16px 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .build-guide h4 {
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .build-guide p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 6px 0;
+  }
+
+  .build-guide ol,
+  .build-guide ul {
+    padding-left: 20px;
+    margin: 4px 0;
+  }
+
+  .build-guide li {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .build-guide .sub-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .build-guide .sub-task {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .build-guide .sub-task:hover { background: var(--card2); }
+
+  .build-guide .sub-task .checkbox {
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+  }
+
+  .build-guide .sub-task.done { background: var(--green-dim); border-color: rgba(48,209,88,0.2); }
+  .build-guide .sub-task.done .sub-task__text { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--dim); }
+
+  .build-guide .sub-task__text {
+    font-size: 13px;
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .build-guide .warning {
+    background: rgba(255,69,58,0.08);
+    border: 1px solid rgba(255,69,58,0.3);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 16px;
+  }
+
+  .build-guide .warning h4 { color: var(--red); margin-top: 0; }
+  .build-guide .warning p,
+  .build-guide .warning li { color: var(--text); }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0 14px;
+  }
+
+  /* ── DONE BANNER ── */
+  .done-banner {
+    display: none;
+    text-align: center;
+    padding: 36px 24px;
+    border: 1px solid var(--gold-line);
+    border-radius: var(--radius);
+    background: var(--gold-dim);
+    margin-top: 12px;
+  }
+
+  .done-banner.show { display: block; }
+  .done-banner h2 { font-size: 22px; color: var(--gold); margin-bottom: 8px; }
+  .done-banner p  { color: var(--muted); font-size: 14px; }
+
+  /* ── RESET ── */
+  .reset-btn {
+    display: block;
+    margin: 28px auto 0;
+    background: none;
+    border: 1px solid var(--dim);
+    color: var(--muted);
+    font-size: 12px;
+    padding: 8px 18px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── CONFETTI ── */
+  .confetti-piece {
+    position: fixed;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 9999;
+    animation: confettiFall 0.9s ease-in forwards;
+  }
+
+  @keyframes confettiFall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(180px) rotate(360deg); opacity: 0; }
+  }
+
+  @media (max-width: 480px) {
+    .main { padding: 20px 16px 0; }
+    .header { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div>
+        <div class="brand">Mobil Bilvård Åland</div>
+        <div class="header-title">Lanseringsplan</div>
+      </div>
+      <div style="text-align:right">
+        <div class="progress-label"><span id="pct">0</span>% klart</div>
+        <div class="progress-label" style="margin-top:2px"><span id="done-count">0</span> / <span id="total-count">0</span> steg</div>
+      </div>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="bar"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ─── FAS 1: DENNA VECKA (KRITISK) ─────────────────────────────────── -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-tag urgent">Fas 1</span>
+      <div>
+        <div class="phase-title">Denna vecka — innan du tar emot en kund</div>
+        <div class="phase-subtitle">Inget av detta kan skippas. Gör det här FÖRST.</div>
+      </div>
+      <div class="phase-progress" id="prog-1"></div>
+    </div>
+    <div class="tasks" data-phase="1">
+
+      <div class="task crit" data-id="t1" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Köp in kemikalier och grundutrustning</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~2–3 h</span>
+            <span class="badge cost">100–200 €</span>
+          </div>
+          <div class="task-note">Mikrofiber, förtvättskum, avfettare, fälgrengöring, vax. Du kan inte leverera utan material.</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="t2" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Utför 2–3 referensjobb (gratis eller kraftigt rabatterade)</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">1–2 dagar</span>
+          </div>
+          <div class="task-note">Ta tydliga före/efter-foton. Utan bilder har du inget att marknadsföra. Det är din viktigaste tillgång.</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="t3" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Publicera hemsidan online</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~30 min</span>
+            <span class="badge tool">Netlify (gratis)</span>
+          </div>
+          <div class="task-note">Utan hemsida finns du inte. Netlify — dra och släpp mappen, live på 10 minuter.</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="t4" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Köp domän (mobilbilvard.ax eller .fi)</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~15 min</span>
+            <span class="badge cost">~15 €/år</span>
+            <span class="badge tool">domains.google / One.com</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="t5" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Skapa Google Business-profil</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~20 min</span>
+            <span class="badge tool">business.google.com</span>
+          </div>
+          <div class="task-note">Google-sök är det mest köpintentionsrika stället på internet — och det är helt gratis.</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="t6" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Sätt upp betalningslösning</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~30 min</span>
+            <span class="badge tool">Mobilepay / Stripe</span>
+          </div>
+          <div class="task-note">Du måste kunna ta betalt innan du utför jobbet. Inget system = inget betalt.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t7" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Aktivera Instagram (@mobilbilvard.aland)</div>
+          <div class="task-meta">
+            <span class="badge time">~1 h</span>
+          </div>
+          <div class="task-note">Profilbild, bio med bokningslänk, länka till hemsidan. Lägg upp minst 3 foton innan du "öppnar".</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t8" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Skriv bekräftelsemall (SMS / mail)</div>
+          <div class="task-meta">
+            <span class="badge time">~20 min</span>
+          </div>
+          <div class="task-note">Kunden ska få bekräftelse inom 30 min från bokning. Spara mallen — du ska skicka den efter varje bokning.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t9" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Lägg upp Calendly (gratis plan) och länka på hemsidan</div>
+          <div class="task-meta">
+            <span class="badge time">~30 min</span>
+            <span class="badge tool">calendly.com</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t10" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Beräkna resekostnad per zon på Åland</div>
+          <div class="task-meta">
+            <span class="badge time">~30 min</span>
+          </div>
+          <div class="task-note">Sätt ett körtillägg för uppdrag utanför Mariehamn så du aldrig kör med förlust.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── FAS 2: LANSERING DAG 1 ────────────────────────────────────────── -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-tag launch">Fas 2</span>
+      <div>
+        <div class="phase-title">Lansering — Dag 1</div>
+        <div class="phase-subtitle">Allt ovanstående är klart. Nu öppnar du.</div>
+      </div>
+      <div class="phase-progress" id="prog-2"></div>
+    </div>
+    <div class="tasks" data-phase="2">
+
+      <div class="task crit" data-id="t11" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Skicka 10 personliga meddelanden till warm leads</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~1 h</span>
+          </div>
+          <div class="task-note">INTE ett gruppmeddelande. Individuella meddelanden konverterar 3–5× bättre. Ta dig tiden.</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="t12" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Publicera lanseringsinlägg på Instagram (före/efter-foton)</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~30 min</span>
+          </div>
+          <div class="task-note">Visa resultaten. Inkludera pris och bokningslänk. Be bekanta dela.</div>
+        </div>
+      </div>
+
+      <div class="task crit" data-id="t13" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Aktivera Google Business med foton och bokningslänk</div>
+          <div class="task-meta">
+            <span class="badge crit">Kritisk</span>
+            <span class="badge time">~20 min</span>
+          </div>
+          <div class="task-note">Ladda upp foton, sätt öppettider och länka till Calendly / hemsidan.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t14" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Dela lanseringsinlägget i din personliga story — be bekanta dela vidare</div>
+          <div class="task-meta">
+            <span class="badge time">~10 min</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t15" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Publicera ett presentationsinlägg i lokala Åland Facebook-grupper</div>
+          <div class="task-meta">
+            <span class="badge time">~20 min</span>
+          </div>
+          <div class="task-note">Ej spam-stil — presentera dig och vad du erbjuder, länk till hemsidan.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── FAS 3: VECKA 1–2 ───────────────────────────────────────────────── -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-tag week1">Fas 3</span>
+      <div>
+        <div class="phase-title">Vecka 1–2 — Aktivt prospekteringsschema</div>
+        <div class="phase-subtitle">Mål: 5 betalande kunder</div>
+      </div>
+      <div class="phase-progress" id="prog-3"></div>
+    </div>
+    <div class="tasks" data-phase="3">
+
+      <div class="task" data-id="t16" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Dag 2 — Kontakta 5 lokala småföretag</div>
+          <div class="task-meta"><span class="badge time">Dag 2</span></div>
+          <div class="task-note">Bilhandlare, fastighetsmäklare, företag med parkering. Erbjud flottapris.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t17" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Dag 3 — Publicera "Hur det fungerar"-inlägg på Instagram</div>
+          <div class="task-meta"><span class="badge time">Dag 3</span></div>
+          <div class="task-note">Video om möjligt. Visa hela processen från bokning till leverans.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t18" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Dag 4 — Knacka på grannar / lokalt nätverk (personliga samtal)</div>
+          <div class="task-meta"><span class="badge time">Dag 4</span></div>
+          <div class="task-note">Direkt konversation är fortfarande det mest effektiva sättet att sälja en lokal tjänst.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t19" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Dag 5 — Uppföljning till alla som svarat men inte bokat</div>
+          <div class="task-meta"><span class="badge time">Dag 5</span></div>
+          <div class="task-note">"Hej! Kom ihåg att du visade intresse — vill du boka en tid?"</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t20" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Dag 5 — Lämna visitkort hos bilhandlare och bensinstationer</div>
+          <div class="task-meta"><span class="badge time">Dag 5</span></div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t21" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Dag 7 — Publicera första kundrecensionen på Instagram (med tillstånd)</div>
+          <div class="task-meta"><span class="badge time">Dag 7</span></div>
+          <div class="task-note">Socialt bevis är din starkaste marknadsföringsresurs i den här fasen.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t22" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Dag 10 — Skicka erbjudande: "Boka under april och få 15 % rabatt"</div>
+          <div class="task-meta"><span class="badge time">Dag 10</span></div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t23" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Dag 14 — Utvärdering: Hur många bokningar? Vad funkade? Justera.</div>
+          <div class="task-meta"><span class="badge time">Dag 14</span></div>
+          <div class="task-note">Anteckna vad som genererade flest leads. Dubbla det som funkade. Sluta med det som inte funkade.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── FAS 4: MÅNAD 1–2 ───────────────────────────────────────────────── -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-tag month1">Fas 4</span>
+      <div>
+        <div class="phase-title">Månad 1–2 — Bygga grunden</div>
+        <div class="phase-subtitle">Mål: stabil intäkt 800–1 000 € / mån</div>
+      </div>
+      <div class="phase-progress" id="prog-4"></div>
+    </div>
+    <div class="tasks" data-phase="4">
+
+      <div class="task" data-id="t24" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">5 betalande kunder genomförda</div>
+          <div class="task-meta"><span class="badge time">Månad 1</span></div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t25" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Be varje kund aktivt om en Google-recension (skicka direktlänken)</div>
+          <div class="task-meta"><span class="badge time">Löpande</span></div>
+          <div class="task-note">Mål: 5 recensioner inom månad 1. Skicka länken direkt i avslutningsmeddelandet.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t26" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Skapa kalkylblad med alla kunder (namn, kontakt, senaste jobb, antal jobb)</div>
+          <div class="task-meta"><span class="badge time">~30 min</span></div>
+          <div class="task-note">Ditt CRM-system i startfasen. Enkelt men nödvändigt för stamkundsarbete.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t27" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Identifiera dina 3 första stamkunder och boka nästa tid på plats</div>
+          <div class="task-meta"><span class="badge time">Månad 1</span></div>
+          <div class="task-note">"Nästa gång kan vi boka direkt — vill du ha en fast tid varje 6 veckor?"</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t28" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">5 Google-recensioner insamlade</div>
+          <div class="task-meta"><span class="badge time">Månad 1</span></div>
+          <div class="task-note">Kritisk milstolpe. Utan recensioner är betald annonsering bortkastad.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t29" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Sätt upp påminnelserutin: kontakta kunder 6–8 veckor efter senaste besök</div>
+          <div class="task-meta"><span class="badge time">~20 min</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── FAS 5: SKALNING (MÅNAD 3+) ────────────────────────────────────── -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-tag scale">Fas 5</span>
+      <div>
+        <div class="phase-title">Månad 3+ — Skalning mot 1 000 € och bortom</div>
+        <div class="phase-subtitle">Nu har du bevis. Nu kan du växa.</div>
+      </div>
+      <div class="phase-progress" id="prog-5"></div>
+    </div>
+    <div class="tasks" data-phase="5">
+
+      <div class="task" data-id="t30" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Prospektera flottakunder — boka möten med 3–5 lokala småföretag</div>
+          <div class="task-meta"><span class="badge time">Månad 2–3</span></div>
+          <div class="task-note">4 bilar × 1 gång/månad till fast pris = en av dina mest värdefulla kunder.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t31" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Testa Instagram-annons (5–10 € / dag i 7 dagar)</div>
+          <div class="task-meta"><span class="badge time">Månad 3</span></div>
+          <div class="task-note">Rikta mot Åland, ålder 30–60, "Bil & transport"-intresse. Kör INTE detta utan minst 5 Google-recensioner.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t32" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">10+ Google-recensioner uppnådda</div>
+          <div class="task-meta"><span class="badge time">Månad 3</span></div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t33" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Testa Google Ads på sökorden "bilvård Åland" och "biltvätt hemma Åland"</div>
+          <div class="task-meta"><span class="badge time">Månad 3+</span></div>
+          <div class="task-note">Högt köpintention — konverterar bättre än sociala medier-annonser för lokal tjänst.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t34" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">Lansera "Sommarpaket" med fast pris (3 tvätt + 1 rekonditionering)</div>
+          <div class="task-meta"><span class="badge time">Inför sommaren</span></div>
+          <div class="task-note">Säljs i förväg — ger dig förutsägbar intäkt och binder kunden till dig för säsongen.</div>
+        </div>
+      </div>
+
+      <div class="task" data-id="t35" onclick="toggle(this)">
+        <div class="checkbox">✓</div>
+        <div class="task-body">
+          <div class="task-title">🏆 Mål uppnått: 1 000 € netto / månad</div>
+          <div class="task-meta"><span class="badge time">Dag 60</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="done-banner" id="done-banner">
+    <h2>🏆 Lanseringsplanen klar!</h2>
+    <p>Du har genomfört alla steg. Dags att sätta nästa mål.</p>
+  </div>
+
+  <button class="reset-btn" onclick="resetAll()">Återställ alla steg</button>
+
+</div>
+
+<script>
+  const STORAGE_KEY = 'mba_launch_v2';
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+  }
+
+  function saveState(state) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+  }
+
+  function toggle(el) {
+    const id = el.dataset.id;
+    const state = loadState();
+    const wasDone = el.classList.contains('done');
+    if (wasDone) {
+      el.classList.remove('done');
+      delete state[id];
+    } else {
+      el.classList.add('done');
+      state[id] = true;
+      spawnConfetti(el);
+    }
+    saveState(state);
+    updateProgress();
+  }
+
+  function spawnConfetti(el) {
+    const rect = el.getBoundingClientRect();
+    const colors = ['#C8A96E','#30d158','#64d2ff','#bf5af2','#ff9f0a'];
+    for (let i = 0; i < 10; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = (rect.left + rect.width * Math.random()) + 'px';
+      p.style.top  = (rect.top  + 20) + 'px';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.animationDelay = (Math.random() * 0.3) + 's';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 1200);
+    }
+  }
+
+  function updateProgress() {
+    const all   = document.querySelectorAll('.task');
+    const doneN = document.querySelectorAll('.task.done').length;
+    const total = all.length;
+    const pct   = total ? Math.round(doneN / total * 100) : 0;
+
+    document.getElementById('bar').style.width = pct + '%';
+    document.getElementById('pct').textContent = pct;
+    document.getElementById('done-count').textContent = doneN;
+    document.getElementById('total-count').textContent = total;
+
+    // Phase sub-progress
+    for (let p = 1; p <= 5; p++) {
+      const phaseEls = document.querySelectorAll(`[data-phase="${p}"] .task`);
+      const phaseDone = document.querySelectorAll(`[data-phase="${p}"] .task.done`).length;
+      const el = document.getElementById(`prog-${p}`);
+      if (el && phaseEls.length) {
+        el.textContent = `${phaseDone}/${phaseEls.length}`;
+      }
+    }
+
+    document.getElementById('done-banner').classList.toggle('show', doneN === total && total > 0);
+  }
+
+  function resetAll() {
+    if (!confirm('Återställa alla steg?')) return;
+    saveState({});
+    document.querySelectorAll('.task.done').forEach(t => t.classList.remove('done'));
+    updateProgress();
+  }
+
+  // Init
+  (function() {
+    const state = loadState();
+    Object.keys(state).forEach(id => {
+      const el = document.querySelector(`[data-id="${id}"]`);
+      if (el) el.classList.add('done');
+    });
+    updateProgress();
+  })();
+</script>
+</body>
+</html>
