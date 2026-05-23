@@ -1122,7 +1122,7 @@
     document.getElementById('total-count').textContent = total;
 
     // Phase sub-progress
-    for (let p = 1; p <= 5; p++) {
+    for (let p = 0; p <= 5; p++) {
       const phaseEls = document.querySelectorAll(`[data-phase="${p}"] .task`);
       const phaseDone = document.querySelectorAll(`[data-phase="${p}"] .task.done`).length;
       const el = document.getElementById(`prog-${p}`);
